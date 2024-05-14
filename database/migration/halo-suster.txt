@@ -1,0 +1,39 @@
+CREATE TYPE "role" AS ENUM (
+  'it',
+  'nurse'
+);
+
+CREATE TYPE "gender" AS ENUM (
+  'male',
+  'female'
+);
+
+CREATE TABLE "staff" (
+  "id" uuid PRIMARY KEY,
+  "nip" bigint,
+  "name" varchar,
+  "role" role,
+  "identityCardScanImg" varchar,
+  "createdAt" timestamp
+);
+
+CREATE TABLE "patient" (
+  "identityNumber" bigint PRIMARY KEY,
+  "phoneNumber" varchar,
+  "name" varchar,
+  "birthDate" date,
+  "gender" gender,
+  "identityCardScanImg" varchar
+);
+
+CREATE TABLE "medicalRecord" (
+  "identityNumber" bigint,
+  "symptoms" text,
+  "medications" text,
+  "createAt" timestamp,
+  "createBy" uuid
+);
+
+ALTER TABLE "record" ADD FOREIGN KEY ("createBy") REFERENCES "staff" ("id");
+
+ALTER TABLE "record" ADD FOREIGN KEY ("identityNumber") REFERENCES "patient" ("identityNumber");

@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS "patient";
+DROP TYPE IF EXISTS "gender";
