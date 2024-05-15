@@ -25,13 +25,13 @@ type Patient struct {
 }
 
 type PostMedicalRecordRequest struct {
-	IdentityNumber string `json:"identityNumber" validate:"required,len=16,numeric"`
+	IdentityNumber int `json:"identityNumber" validate:"required,len=16,numeric"`
 	Symptoms       string `json:"symptoms" validate:"required,min=1,max=2000"`
 	Medications    string `json:"medications" validate:"required,min=1,max=2000"`
 }
 
 type MedicalRecord struct {
-	IdentityNumber string `json:"identityNumber" db:"identityNumber"`
+	IdentityNumber int `json:"identityNumber" db:"identityNumber"`
 	Symptoms       string `json:"symptoms" db:"symptoms"`
 	Medications    string `json:"medications" db:"medications"`
 	CreatedAt      string `json:"createdAt" db:"createdAt"`

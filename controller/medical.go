@@ -34,14 +34,36 @@ func (c *MedicalController) PostPatient(ctx echo.Context) error {
 	if err := c.validate.Struct(&patientRequest); err != nil {
 		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
 	}
-	
+
 	_, err := c.service.CreateNewPatient(ctx.Request().Context(), patientRequest)
 	if err != nil {
 		return ctx.JSON(cerr.GetCode(err), model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
 	return ctx.JSON(http.StatusCreated, model.MedicalGeneralResponse{
-		Message: "Customer registered successfully",
+		Message: "Patient successfully registered",
+	})
+}
+
+func (c *MedicalController) PostMedicalReport(ctx echo.Context) error {
+	var medicalRequest model.PostMedicalRecordRequest
+	if err := ctx.Bind(&medicalRequest); err != nil {
+		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
+	}
+
+	if err := c.validate.Struct(&medicalRequest); err != nil {
+		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
+	}
+
+	mockUser := "hello"
+	
+	_, err := c.service.CreateNewMedicalRecord(ctx.Request().Context(), medicalRequest, mockUser)
+	if err != nil {
+		return ctx.JSON(cerr.GetCode(err), model.MedicalGeneralResponse{Message: err.Error()})
+	}
+
+	return ctx.JSON(http.StatusCreated, model.MedicalGeneralResponse{
+		Message: "Medical record successfully added",
 	})
 }
 
