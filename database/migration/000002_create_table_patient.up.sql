@@ -9,5 +9,6 @@ CREATE TABLE "patient" (
    "name" varchar,
    "birthDate" date,
    "gender" gender,
-   "identityCardScanImg" varchar
+   "identityCardScanImg" varchar,
+   "createAt" timestamp
 );
