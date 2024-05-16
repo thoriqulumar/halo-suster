@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"helo-suster/service"
 	"net/http"
 
@@ -27,6 +28,7 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 	file := form.File["file"][0]
 
 	urlChan := ctr.svc.UploadImage(file)
+	fmt.Println("urlChan", urlChan)
 
 	done := make(chan bool)
 
@@ -41,6 +43,7 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 	if url == "" {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
 	}
+	fmt.Println("url", url)
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "File uploaded sucessfully"})
 }

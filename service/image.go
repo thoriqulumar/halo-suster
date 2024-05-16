@@ -48,7 +48,6 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		defer src.Close()
 
 		fileBytes, err := io.ReadAll(src)
-		fmt.Println("fileBytes", fileBytes)
 		if err != nil {
 			fileURLChan <- ""
 			return
@@ -58,7 +57,6 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		fileName := uuid + ".jpeg"
 
 		url, err := uploadToS3(fileBytes, fileName, s.cfg)
-		fmt.Println("url", url)
 		fmt.Println("err upload", err)
 		if err != nil {
 			fileURLChan <- ""
@@ -90,17 +88,18 @@ func uploadToS3(fileBytes []byte, filename string, cfg *config.Config) (string, 
 
 	// Upload file to S3
 	_, err = svc.PutObjectWithContext(context.Background(), &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectKey),
-		ACL:    aws.String("public-read"),
-		Body:   aws.ReadSeekCloser(bytes.NewReader(fileBytes)),
+		Bucket:  aws.String(bucketName),
+		Key:     aws.String("awss3." + objectKey),
+		ACL:     aws.String("public-read"),
+		Body:    aws.ReadSeekCloser(bytes.NewReader(fileBytes)),
+		Tagging: aws.String("latest=true"),
 	})
 	if err != nil {
 		return "", errors.New("failed to upload file to S3")
 	}
 
 	// Generate S3 object URL
-	objectURL := fmt.Sprintf("https://awss3/%s/%s", bucketName, objectKey)
+	objectURL := fmt.Sprintf("https://awss3.%s", objectKey)
 
 	return objectURL, nil
 }
