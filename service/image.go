@@ -92,10 +92,11 @@ func uploadToS3(fileBytes []byte, filename string, cfg *config.Config) (string, 
 	_, err = svc.PutObjectWithContext(context.Background(), &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
+		ACL:    aws.String("public-read"),
 		Body:   aws.ReadSeekCloser(bytes.NewReader(fileBytes)),
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to upload file to S3: %w", err)
+		return "", errors.New("failed to upload file to S3")
 	}
 
 	// Generate S3 object URL
