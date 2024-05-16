@@ -15,7 +15,14 @@ import (
 func (s *Server) RegisterRoute(cfg *config.Config) {
 	mainRoute := s.app.Group("/v1")
 
-	registerMedicalRoute(mainRoute, s.db, cfg, s.validator, s.logger)
+	registerImageRoute(mainRoute, cfg, s.logger)
+  registerMedicalRoute(mainRoute, s.db, cfg, s.validator, s.logger)
+}
+
+func registerImageRoute(e *echo.Group, cfg *config.Config, logger *zap.Logger) {
+	ctr := controller.NewImageController(service.NewImageService(cfg, logger))
+
+	e.POST("/image", ctr.PostImage)
 }
 
 func registerMedicalRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, validate *validator.Validate, logger *zap.Logger) {

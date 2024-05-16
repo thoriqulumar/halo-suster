@@ -14,6 +14,10 @@ type Config struct {
 	DB         DBConfig `env:",prefix=DB_,required"`
 	JWTSecret  string   `env:"JWT_SECRET"`
 	BcryptSalt int      `env:"BCRYPT_SALT"`
+	S3Region   string   `env:"S3_REGION"`
+	S3Bucket   string   `env:"S3_BUCKET_NAME"`
+	S3Id       string   `env:"S3_ID"`
+	S3Secret   string   `env:"S3_SECRET_KEY"`
 }
 
 type DBConfig struct {
