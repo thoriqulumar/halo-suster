@@ -2,16 +2,13 @@ package controller
 
 import (
 	"helo-suster/service"
-	"io"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
 type ImageController struct {
-	svc   service.ImageService
-	s3Svc service.S3Service
+	svc service.ImageService
 }
 
 func NewImageController(svc service.ImageService) *ImageController {
@@ -26,31 +23,48 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "params not valid"})
 	}
 
-	src, err := file.Open()
-	if err != nil {
+	done := make(chan bool)
+
+	urlChan := ctr.svc.UploadImage(file)
+
+	go func() {
+		defer close(done)
+		<-urlChan
+	}()
+
+	<-done
+
+	url := <-urlChan
+	if url == "" {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
 	}
-	defer src.Close()
 
-	fileName := file.Filename
-	if !strings.HasSuffix(strings.ToLower(fileName), ".jpg") && !strings.HasSuffix(strings.ToLower(fileName), ".jpeg") {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Only JPG/JPEG files are allowed"})
-	}
+	return c.JSON(http.StatusOK, echo.Map{"message": "File uploaded sucessfully"})
+	// src, err := file.Open()
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
+	// }
+	// defer src.Close()
 
-	fileBytes, err := io.ReadAll(src)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
-	}
+	// fileName := file.Filename
+	// if !strings.HasSuffix(strings.ToLower(fileName), ".jpg") && !strings.HasSuffix(strings.ToLower(fileName), ".jpeg") {
+	// 	return c.JSON(http.StatusBadRequest, echo.Map{"error": "Only JPG/JPEG files are allowed"})
+	// }
 
-	fileSize := len(fileBytes)
-	if fileSize > 2*1024*1024 || fileSize < 10*1024 {
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "File size must be between 10KB and 2MB"})
-	}
+	// fileBytes, err := io.ReadAll(src)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
+	// }
 
-	// Reset file reader after reading its content
-	src.Seek(0, io.SeekStart)
+	// fileSize := len(fileBytes)
+	// if fileSize > 2*1024*1024 || fileSize < 10*1024 {
+	// 	return c.JSON(http.StatusBadRequest, echo.Map{"error": "File size must be between 10KB and 2MB"})
+	// }
 
-	newFileName, err := ctr.svc.SaveImage(src)
+	// // Reset file reader after reading its content
+	// src.Seek(0, io.SeekStart)
 
-	ctr.s3Svc.UploadImage(fileName, src) // like this
+	// newFileName, err := ctr.svc.SaveImage(src)
+
+	// ctr.s3Svc.UploadImage(fileName, src) // like this
 }

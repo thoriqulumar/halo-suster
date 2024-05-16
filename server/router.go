@@ -2,6 +2,8 @@ package server
 
 import (
 	"helo-suster/config"
+	"helo-suster/controller"
+	"helo-suster/service"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -14,5 +16,7 @@ func (s *Server) RegisterRoute(cfg *config.Config) {
 }
 
 func registerImageRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config) {
-	e.POST("/image")
+	ctr := controller.NewImageController(service.NewImageService())
+
+	e.POST("/image", ctr.PostImage)
 }
