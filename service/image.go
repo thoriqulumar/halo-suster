@@ -75,7 +75,7 @@ func uploadToS3(fileBytes []byte, filename string, cfg *config.Config) (string, 
 	// Initialize AWS session
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(cfg.S3Region),
-		Credentials: credentials.NewStaticCredentials(cfg.S3Id, cfg.S3Secret, ""),
+		Credentials: credentials.NewStaticCredentials(cfg.S3AcessKey, cfg.S3Secret, ""),
 	})
 	if err != nil {
 		return "", errors.New("failed to create AWS session")
