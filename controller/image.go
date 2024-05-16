@@ -40,10 +40,10 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 	<-done
 
 	url := <-urlChan
+	fmt.Println("url in ctrl", url)
 	if url == "" {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
 	}
-	fmt.Println("url", url)
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "File uploaded sucessfully"})
 }
