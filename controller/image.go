@@ -28,16 +28,6 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 	file := form.File["file"][0]
 
 	urlChan := ctr.svc.UploadImage(file)
-	fmt.Println("urlChan", urlChan)
-
-	done := make(chan bool)
-
-	go func() {
-		defer close(done)
-		<-urlChan
-	}()
-
-	<-done
 
 	url := <-urlChan
 	fmt.Println("url in ctrl", url)
