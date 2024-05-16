@@ -34,7 +34,7 @@ func NewMedicalService(r repo.MedicalRepo, logger *zap.Logger) MedicalService {
 func (s *medicalService) CreateNewPatient(ctx context.Context, request model.PostPatientRequest) (patient model.Patient, err error) {
 	_, err = s.repo.GetPatientByIdentityNumber(ctx, request.IdentityNumber)
 	if !errors.Is(err, sql.ErrNoRows) {
-		return model.Patient{}, cerr.New(http.StatusConflict, "phoneNumber already exists")
+		return model.Patient{}, cerr.New(http.StatusConflict, "identityNumber already exists")
 	}
 
 	patient, err = s.repo.CreatePatient(ctx, request)

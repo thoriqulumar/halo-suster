@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"context"
+	"context"	
 	"helo-suster/model"
 
 	"github.com/jmoiron/sqlx"
@@ -71,7 +71,7 @@ func (r *medicalRepo) CreateMedicalRecord(ctx context.Context, requestData model
  
 	err = r.db.QueryRowxContext(ctx, createMedicalRecordQuery, requestData.IdentityNumber, 
 		requestData.Symptoms, requestData.Medications, createdBy).StructScan(&medicalRecord)
-	
+
 	if err != nil{
 		return
 	}

@@ -6,7 +6,7 @@ type MedicalGeneralResponse struct {
 }
 
 type PostPatientRequest struct {
-	IdentityNumber      int    `json:"identityNumber" validate:"required,len=16,numeric"`
+	IdentityNumber      int    `json:"identityNumber" validate:"required"`
 	PhoneNumber         string `json:"phoneNumber" validate:"required,min=10,max=15,phone_number"`
 	Name                string `json:"name" validate:"required,min=3,max=30"`
 	BirthDate           string `json:"birthDate" validate:"required"`
@@ -25,13 +25,13 @@ type Patient struct {
 }
 
 type PostMedicalRecordRequest struct {
-	IdentityNumber int `json:"identityNumber" validate:"required,len=16,numeric"`
+	IdentityNumber int    `json:"identityNumber" validate:"required"`
 	Symptoms       string `json:"symptoms" validate:"required,min=1,max=2000"`
 	Medications    string `json:"medications" validate:"required,min=1,max=2000"`
 }
 
 type MedicalRecord struct {
-	IdentityNumber int `json:"identityNumber" db:"identityNumber"`
+	IdentityNumber int    `json:"identityNumber" db:"identityNumber"`
 	Symptoms       string `json:"symptoms" db:"symptoms"`
 	Medications    string `json:"medications" db:"medications"`
 	CreatedAt      string `json:"createdAt" db:"createdAt"`

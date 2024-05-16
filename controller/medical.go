@@ -6,6 +6,7 @@ import (
 	"helo-suster/service"
 	"net/http"
 	"regexp"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -31,8 +32,12 @@ func (c *MedicalController) PostPatient(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
+	if len(strconv.Itoa(int(patientRequest.IdentityNumber))) != 16{
+		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: "identityNumber should be 16 digits"})
+	}
+
 	if err := c.validate.Struct(&patientRequest); err != nil {
-		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
+        return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
 	_, err := c.service.CreateNewPatient(ctx.Request().Context(), patientRequest)
@@ -51,11 +56,15 @@ func (c *MedicalController) PostMedicalReport(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
+	if len(strconv.Itoa(int(medicalRequest.IdentityNumber))) != 16{
+		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: "identityNumber should be 16 digits"})
+	}
+
 	if err := c.validate.Struct(&medicalRequest); err != nil {
 		return ctx.JSON(http.StatusBadRequest,  model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
-	mockUser := "hello"
+	mockUser := "8d203c88-9bc2-4838-ac7f-622cc737d614"
 	
 	_, err := c.service.CreateNewMedicalRecord(ctx.Request().Context(), medicalRequest, mockUser)
 	if err != nil {

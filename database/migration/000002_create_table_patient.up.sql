@@ -10,5 +10,5 @@ CREATE TABLE "patient" (
    "birthDate" date,
    "gender" gender,
    "identityCardScanImg" varchar,
-   "createAt" timestamp
+   "createdAt" timestamp
 );
