@@ -1,8 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
+	"helo-suster/model"
 	"helo-suster/service"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,21 +30,36 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 
 	file := form.File["file"][0]
 
+	fileName := file.Filename
+	if !strings.HasSuffix(strings.ToLower(fileName), ".jpg") && !strings.HasSuffix(strings.ToLower(fileName), ".jpeg") {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Only JPG/JPEG files are allowed"})
+	}
+
+	fileSize := file.Size
+	if fileSize > 2*1024*1024 || fileSize < 10*1024 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "File size must be between 10KB and 2MB"})
+	}
+
 	urlChan := ctr.svc.UploadImage(file)
 
-	done := make(chan bool)
-
-	go func() {
-		defer close(done)
-		<-urlChan
-	}()
-
-	<-done
-
 	url := <-urlChan
+	fmt.Println("url in ctrl", url)
 	if url == "" {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"message": "File uploaded sucessfully"})
+	jsonResponse := fmt.Sprintf(`{
+		"message": "File uploaded successfully",
+		"data": {
+			"imageUrl": "%s"
+		}
+	}`, url)
+
+	var resp model.PostImageResponse
+	err = json.Unmarshal([]byte(jsonResponse), &resp)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, echo.Map{"error": "Internal server error"})
+	}
+
+	return c.JSON(http.StatusOK, resp)
 }

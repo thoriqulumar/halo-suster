@@ -13,7 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/google/uuid"
+
+	// "github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +41,6 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		defer close(fileURLChan)
 
 		src, err := file.Open()
-		fmt.Println("file:", src)
 		if err != nil {
 			fileURLChan <- ""
 			return
@@ -48,18 +48,15 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		defer src.Close()
 
 		fileBytes, err := io.ReadAll(src)
-		fmt.Println("fileBytes", fileBytes)
 		if err != nil {
 			fileURLChan <- ""
 			return
 		}
 
-		uuid := uuid.New().String()
-		fileName := uuid + ".jpeg"
+		// uuid := uuid.New().String()
+		// fileName := uuid + ".jpeg"
 
-		url, err := uploadToS3(fileBytes, fileName, s.cfg)
-		fmt.Println("url", url)
-		fmt.Println("err upload", err)
+		url, err := uploadToS3(fileBytes, "2b1dcd3b-54a3-4029-9da5-58e316ec6b8b.jpeg", s.cfg)
 		if err != nil {
 			fileURLChan <- ""
 			return
@@ -75,7 +72,7 @@ func uploadToS3(fileBytes []byte, filename string, cfg *config.Config) (string, 
 	// Initialize AWS session
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(cfg.S3Region),
-		Credentials: credentials.NewStaticCredentials(cfg.S3Id, cfg.S3Secret, ""),
+		Credentials: credentials.NewStaticCredentials(cfg.S3AcessKey, cfg.S3Secret, ""),
 	})
 	if err != nil {
 		return "", errors.New("failed to create AWS session")
@@ -90,17 +87,18 @@ func uploadToS3(fileBytes []byte, filename string, cfg *config.Config) (string, 
 
 	// Upload file to S3
 	_, err = svc.PutObjectWithContext(context.Background(), &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectKey),
-		ACL:    aws.String("public-read"),
-		Body:   aws.ReadSeekCloser(bytes.NewReader(fileBytes)),
+		Bucket:  aws.String(bucketName),
+		Key:     aws.String("awss3." + objectKey),
+		ACL:     aws.String("public-read"),
+		Body:    aws.ReadSeekCloser(bytes.NewReader(fileBytes)),
+		Tagging: aws.String("latest=true"),
 	})
 	if err != nil {
 		return "", errors.New("failed to upload file to S3")
 	}
 
 	// Generate S3 object URL
-	objectURL := fmt.Sprintf("https://awss3/%s/%s", bucketName, objectKey)
+	objectURL := fmt.Sprintf("https://awss3.%s", objectKey)
 
 	return objectURL, nil
 }
