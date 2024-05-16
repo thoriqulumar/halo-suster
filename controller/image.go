@@ -18,14 +18,17 @@ func NewImageController(svc service.ImageService) *ImageController {
 }
 
 func (ctr *ImageController) PostImage(c echo.Context) error {
-	file, err := c.FormFile("file")
+	// Read form data including uploaded file
+	form, err := c.MultipartForm()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "params not valid"})
 	}
 
-	done := make(chan bool)
+	file := form.File["file"][0]
 
 	urlChan := ctr.svc.UploadImage(file)
+
+	done := make(chan bool)
 
 	go func() {
 		defer close(done)

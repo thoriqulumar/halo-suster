@@ -40,6 +40,7 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		defer close(fileURLChan)
 
 		src, err := file.Open()
+		fmt.Println("file:", src)
 		if err != nil {
 			fileURLChan <- ""
 			return
@@ -47,6 +48,7 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		defer src.Close()
 
 		fileBytes, err := io.ReadAll(src)
+		fmt.Println("fileBytes", fileBytes)
 		if err != nil {
 			fileURLChan <- ""
 			return
@@ -56,6 +58,8 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 		fileName := uuid + ".jpeg"
 
 		url, err := uploadToS3(fileBytes, fileName, s.cfg)
+		fmt.Println("url", url)
+		fmt.Println("err upload", err)
 		if err != nil {
 			fileURLChan <- ""
 			return
