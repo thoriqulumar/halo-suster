@@ -35,6 +35,11 @@ func (ctr *ImageController) PostImage(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Only JPG/JPEG files are allowed"})
 	}
 
+	fileSize := file.Size
+	if fileSize > 2*1024*1024 || fileSize < 10*1024 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "File size must be between 10KB and 2MB"})
+	}
+
 	urlChan := ctr.svc.UploadImage(file)
 
 	url := <-urlChan
