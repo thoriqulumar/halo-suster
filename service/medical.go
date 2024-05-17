@@ -17,6 +17,7 @@ import (
 type MedicalService interface {
 	CreateNewPatient(ctx context.Context, request model.PostPatientRequest) (patient model.Patient, err error)
 	CreateNewMedicalRecord(ctx context.Context, request model.PostMedicalRecordRequest, createdBy string) (medicalRecord model.MedicalRecord, err error)
+	GetAllPatient(ctx context.Context, params model.GetPatientParams) (listPatient []model.Patient, err error)
 }
 
 type medicalService struct {
@@ -57,4 +58,13 @@ func (s *medicalService) CreateNewMedicalRecord(ctx context.Context, request mod
 	}
 
 	return medicalRecord, nil
+}
+
+func (s *medicalService) GetAllPatient(ctx context.Context, params model.GetPatientParams) (listPatient []model.Patient, err error) {
+	listPatient, err = s.repo.GetPatient(ctx, params)
+	if err != nil {
+		return
+	}
+
+	return listPatient, nil
 }

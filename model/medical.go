@@ -37,3 +37,12 @@ type MedicalRecord struct {
 	CreatedAt      string `json:"createdAt" db:"createdAt"`
 	CreatedBy      string `json:"createdBy" db:"createdBy"`
 }
+
+type GetPatientParams struct {
+	IdentityNumber int
+	Name           string
+	PhoneNumber    string
+	Limit          int
+	Offset         int
+	CreatedAt      string
+}

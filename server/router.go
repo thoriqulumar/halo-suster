@@ -30,4 +30,5 @@ func registerMedicalRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, valida
 
 	e.POST("/medical/patient", ctr.PostPatient)
 	e.POST("/medical/record", ctr.PostMedicalReport)
+	e.GET("/medical/patient", ctr.GetPatient)
 }
