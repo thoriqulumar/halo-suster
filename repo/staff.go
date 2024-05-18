@@ -54,7 +54,7 @@ func generateGetStaffSQLFilter(params model.GetStaffRequest) string {
 		dbTag := typeField.Tag.Get("schema")
 
 		// Skip limit and offset fields
-		if dbTag == "limit" || dbTag == "offset" {
+		if dbTag == "limit" || dbTag == "offset" || dbTag == "createdAt" {
 			continue
 		}
 
@@ -88,6 +88,14 @@ func generateGetStaffSQLFilter(params model.GetStaffRequest) string {
 	filter := strings.Join(conditions, " AND ")
 	if filter != "" {
 		filter = "WHERE " + filter
+	}
+
+	orderByClause := ""
+	if params.CreatedAt != nil {
+		orderByClause = fmt.Sprintf(` ORDER BY "createdAt" %s`, *params.CreatedAt)
+	}
+	if orderByClause != "" {
+		filter += " " + orderByClause
 	}
 
 	// Add additional clauses such as LIMIT and OFFSET
