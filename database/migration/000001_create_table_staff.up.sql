@@ -9,6 +9,7 @@ CREATE TABLE "staff" (
      "nip" bigint,
      "name" varchar,
      "role" role,
+     "password" varchar,
      "identityCardScanImg" varchar,
      "createdAt" timestamp
 );
