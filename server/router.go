@@ -39,4 +39,5 @@ func registerStaffRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, validate
 	ctr := controller.NewStaffController(service.NewStaffService(cfg, repo.NewStaffRepo(db)), validate)
 
 	e.POST("/user/it/register", ctr.Register)
+	e.GET("/user", ctr.GetStaff)
 }

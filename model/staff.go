@@ -31,3 +31,18 @@ type RegisterStaffResponse struct {
 	Message string         `json:"message"`
 	Data    StaffWithToken `json:"data"`
 }
+
+type GetStaffRequest struct {
+	UserId    *string `schema:"userId"`
+	Limit     *int32  `schema:"limit"`
+	Offset    *int32  `schema:"offset"`
+	Name      *string `schema:"name"`
+	Nip       *int32  `schema:"nip"`
+	Role      *string `schema:"role"`
+	CreatedAt *string `schema:"createdAt"`
+}
+
+type GetStaffResponse struct {
+	Message string  `json:"message"`
+	Data    []Staff `json:"data"`
+}

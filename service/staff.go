@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"helo-suster/config"
@@ -13,6 +14,7 @@ import (
 
 type StaffService interface {
 	Register(newStaff model.Staff) (model.StaffWithToken, error)
+	GetStaff(ctx context.Context, param model.GetStaffRequest) ([]model.Staff, error)
 }
 
 type staffSvc struct {
@@ -66,6 +68,14 @@ func (s *staffSvc) Register(newStaff model.Staff) (model.StaffWithToken, error) 
 	}
 	return serviceResponse, err
 
+}
+
+func (s *staffSvc) GetStaff(ctx context.Context, param model.GetStaffRequest) ([]model.Staff, error) {
+	staffList, err := s.repo.GetStaff(ctx, param)
+	if staffList == nil || err != nil {
+		staffList = []model.Staff{}
+	}
+	return staffList, err
 }
 
 func DetermineRoleByNIP(nip int64) (string, error) {
