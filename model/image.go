@@ -3,6 +3,6 @@ package model
 type PostImageResponse struct {
 	Message string `json:"message"`
 	Data    struct {
-		ImageURL string
+		ImageURL string `json:"imageUrl"`
 	} `json:"data"`
 }
