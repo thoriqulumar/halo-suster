@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"helo-suster/config"
+	"halo-suster/config"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"

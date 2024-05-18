@@ -1,4 +1,4 @@
-module helo-suster
+module halo-suster
 
 go 1.22
 

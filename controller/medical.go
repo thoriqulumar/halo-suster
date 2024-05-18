@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"helo-suster/model"
-	cerr "helo-suster/pkg/customError"
-	"helo-suster/service"
+	"halo-suster/model"
+	cerr "halo-suster/pkg/customErr"
+	"halo-suster/service"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -113,10 +113,6 @@ func (c *MedicalController) GetMedicalRecord(ctx echo.Context) error {
 		Data:    data,
 	})
 }
-
-
-
-
 
 func validatePhoneNumber(fl validator.FieldLevel) bool {
 	phoneNumber := fl.Field().String()

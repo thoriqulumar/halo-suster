@@ -1,11 +1,11 @@
 package application
 
 import (
-	"helo-suster/config"
-	"helo-suster/database"
-	"helo-suster/pkg/log"
-	"helo-suster/server"
-	"helo-suster/version"
+	"halo-suster/config"
+	"halo-suster/database"
+	"halo-suster/pkg/log"
+	"halo-suster/server"
+	"halo-suster/version"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

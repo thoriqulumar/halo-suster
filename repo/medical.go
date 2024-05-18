@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
-	"helo-suster/model"
+	"halo-suster/model"
 
 	"github.com/jmoiron/sqlx"
 )

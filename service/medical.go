@@ -5,10 +5,10 @@ import (
 	"database/sql"
 
 	"errors"
-	cerr "helo-suster/pkg/customError"
+	cerr "halo-suster/pkg/customErr"
 
-	"helo-suster/model"
-	"helo-suster/repo"
+	"halo-suster/model"
+	"halo-suster/repo"
 	"net/http"
 
 	"go.uber.org/zap"

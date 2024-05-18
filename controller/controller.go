@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"helo-suster/service"
+	"halo-suster/service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
