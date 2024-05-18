@@ -37,3 +37,34 @@ type MedicalRecord struct {
 	CreatedAt      string `json:"createdAt" db:"createdAt"`
 	CreatedBy      string `json:"createdBy" db:"createdBy"`
 }
+
+type GetPatientParams struct {
+	IdentityNumber *int
+	Name           string
+	PhoneNumber    string
+	Limit          int
+	Offset         int
+	CreatedAt      string
+}
+
+type GetMedicalRecordParams struct {
+	IdentityNumber  *int
+	CreatedByUserId string
+	CreatedByNip    string
+	Limit           int
+	Offset          int
+	CreatedAt       string
+}
+
+type GetMedicalRecordData struct {
+	IdentityDetail Patient `json:"identityDetail"`
+	Symptoms       string `json:"symptoms" db:"symptoms"`
+	Medications    string `json:"medications" db:"medications"`
+	CreatedAt      string `json:"createdAt" db:"createdAt"`
+	CreatedBy      struct {
+		Nip    string `json:"nip"`
+		Name   string `json:"name"`
+		UserId string `json:"userId"`
+	} `json:"createdBy"`
+}
+

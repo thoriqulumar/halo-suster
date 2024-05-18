@@ -17,7 +17,7 @@ func (s *Server) RegisterRoute(cfg *config.Config) {
 
 	registerImageRoute(mainRoute, cfg, s.logger)
 	registerMedicalRoute(mainRoute, s.db, cfg, s.validator, s.logger)
-	registerUserRoute(mainRoute, s.db)
+	registerStaffRoute(mainRoute, s.db, cfg, s.validator)
 }
 
 func registerImageRoute(e *echo.Group, cfg *config.Config, logger *zap.Logger) {
@@ -31,10 +31,13 @@ func registerMedicalRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, valida
 
 	e.POST("/medical/patient", ctr.PostPatient)
 	e.POST("/medical/record", ctr.PostMedicalReport)
+	e.GET("/medical/patient", ctr.GetPatient)
+	e.GET("/medical/record", ctr.GetMedicalRecord)
 }
 
-func registerUserRoute(e *echo.Group, db *sqlx.DB) {
-	ctr := controller.NewStaffController(service.NewStaffService(repo.NewStaffRepo(db)))
+func registerStaffRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, validate *validator.Validate) {
+	ctr := controller.NewStaffController(service.NewStaffService(cfg, repo.NewStaffRepo(db)), validate)
 
+	e.POST("/user/it/register", ctr.Register)
 	e.GET("/user", ctr.GetStaff)
 }

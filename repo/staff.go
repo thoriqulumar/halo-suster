@@ -12,6 +12,7 @@ import (
 
 type StaffRepo interface {
 	GetStaff(ctx context.Context, param model.GetStaffRequest) (staffList []model.Staff, err error)
+	InsertStaff(staff model.Staff, hashPassword string) error
 }
 
 type staffRepo struct {
@@ -19,9 +20,17 @@ type staffRepo struct {
 }
 
 func NewStaffRepo(db *sqlx.DB) StaffRepo {
-	return &staffRepo{
-		db: db,
+	return &staffRepo{db: db}
+}
+
+func (r *staffRepo) InsertStaff(staff model.Staff, hashPassword string) error {
+
+	query := `INSERT INTO staff (id, nip, name, role, password, "createdAt") VALUES ($1, $2, $3, $4, $5, NOW())`
+	_, err := r.db.Exec(query, staff.UserId, staff.NIP, staff.Name, staff.Role, string(hashPassword))
+	if err != nil {
+		return err
 	}
+	return nil
 }
 
 func (r *staffRepo) GetStaff(ctx context.Context, param model.GetStaffRequest) (staffList []model.Staff, err error) {
