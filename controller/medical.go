@@ -96,28 +96,6 @@ func (c *MedicalController) GetPatient(ctx echo.Context) error {
 	})
 }
 
-func (c *MedicalController) GetMedicalRecord(ctx echo.Context) error {
-	value, err := ctx.FormParams()
-	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "params not valid"})
-	}
-
-	// query to service
-	data, err := c.service.GetAllMedicalRecord(ctx.Request().Context(), parseGetMedicalRecordParams(value))
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
-	}
-
-	return ctx.JSON(http.StatusOK, model.MedicalGeneralResponse{
-		Message: "success",
-		Data:    data,
-	})
-}
-
-
-
-
-
 func validatePhoneNumber(fl validator.FieldLevel) bool {
 	phoneNumber := fl.Field().String()
 	// Regular expression to match phone numbers starting with +62 and having 10 to 15 digits
@@ -133,46 +111,12 @@ func parseGetPatientParams(params url.Values) model.GetPatientParams {
 		case "identityNumber":
 			if len(values[0]) == 16 {
 				identityNumber, _ := strconv.Atoi(values[0])
-				result.IdentityNumber = &identityNumber
+				result.IdentityNumber = identityNumber
 			}
 		case "name":
 			result.Name = values[0]
 		case "phoneNumber":
 			result.PhoneNumber = stripNonNumeric(values[0])
-		case "limit":
-			limit, err := strconv.Atoi(values[0])
-			if err == nil {
-				result.Limit = limit
-			}
-		case "offset":
-			offset, err := strconv.Atoi(values[0])
-			if err == nil {
-				result.Offset = offset
-			}
-		case "createdAt":
-			result.CreatedAt = values[0]
-		}
-	}
-
-	return result
-}
-
-func parseGetMedicalRecordParams(params url.Values) model.GetMedicalRecordParams {
-	var result model.GetMedicalRecordParams
-
-	for key, values := range params {
-		switch key {
-		case "identityDetail.identityNumber":
-			identityNumber, err := strconv.Atoi(values[0])
-			if err == nil {
-				if len(values[0]) == 16 {
-					result.IdentityNumber = &identityNumber
-				}
-			}
-		case "createdBy.userId":
-			result.CreatedByUserId = values[0]
-		case "createdBy.nip":
-			result.CreatedByNip = stripNonNumeric(values[0])
 		case "limit":
 			limit, err := strconv.Atoi(values[0])
 			if err == nil {
