@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/google/uuid"
 	"halo-suster/model"
 	cerr "halo-suster/pkg/customErr"
 	"halo-suster/service"
@@ -170,7 +171,11 @@ func parseGetMedicalRecordParams(params url.Values) model.GetMedicalRecordParams
 				}
 			}
 		case "createdBy.userId":
-			result.CreatedByUserId = values[0]
+			rawID := values[0]
+			sID, err := uuid.Parse(rawID)
+			if err == nil {
+				result.CreatedByUserId = sID
+			}
 		case "createdBy.nip":
 			result.CreatedByNip = stripNonNumeric(values[0])
 		case "limit":

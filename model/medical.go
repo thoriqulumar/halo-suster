@@ -1,5 +1,7 @@
 package model
 
+import "github.com/google/uuid"
+
 type MedicalGeneralResponse struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
@@ -49,7 +51,7 @@ type GetPatientParams struct {
 
 type GetMedicalRecordParams struct {
 	IdentityNumber  *int
-	CreatedByUserId string
+	CreatedByUserId uuid.UUID
 	CreatedByNip    string
 	Limit           int
 	Offset          int

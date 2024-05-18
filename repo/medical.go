@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"halo-suster/model"
 )
@@ -157,8 +158,8 @@ func (r *medicalRepo) GetMedicalRecord(ctx context.Context, params model.GetMedi
 		getMedicalRecordQuery += fmt.Sprintf(` AND "p.identityNumber" = %d`, params.IdentityNumber)
 	}
 
-	if params.CreatedByUserId != "" {
-		getMedicalRecordQuery += fmt.Sprintf(` AND "s.id" = %s`, params.CreatedByUserId)
+	if params.CreatedByUserId != uuid.Nil {
+		getMedicalRecordQuery += fmt.Sprintf(` AND s."id" = '%s'`, params.CreatedByUserId)
 	}
 	if params.CreatedByNip != "" {
 		getMedicalRecordQuery += fmt.Sprintf(` AND "s.nip" = %s`, params.CreatedByNip)
