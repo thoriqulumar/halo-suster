@@ -53,6 +53,11 @@ func generateGetStaffSQLFilter(params model.GetStaffRequest) string {
 		typeField := t.Field(i)
 		dbTag := typeField.Tag.Get("schema")
 
+		// Skip limit and offset fields
+		if dbTag == "limit" || dbTag == "offset" {
+			continue
+		}
+
 		if !field.IsNil() {
 			switch field.Kind() {
 			case reflect.Ptr:
@@ -79,6 +84,7 @@ func generateGetStaffSQLFilter(params model.GetStaffRequest) string {
 		}
 	}
 
+	// Combine conditions with AND
 	filter := strings.Join(conditions, " AND ")
 	if filter != "" {
 		filter = "WHERE " + filter

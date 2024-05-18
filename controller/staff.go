@@ -23,7 +23,6 @@ func (ctr *StaffController) GetStaff(c echo.Context) error {
 	params := c.QueryParams()
 
 	decoder := schema.NewDecoder()
-	decoder.IgnoreUnknownKeys(true)
 
 	err := decoder.Decode(&request, params)
 	if err != nil {
