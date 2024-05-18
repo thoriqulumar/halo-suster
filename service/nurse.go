@@ -47,7 +47,7 @@ func (s *staffSvc) UpdateNurse(ctx context.Context, staff model.UpdateNurseReque
 	}
 	// self NIP
 	if existUserWithNip.UserId != user.UserId && !errors.Is(err, sql.ErrNoRows) {
-		return cerr.New(http.StatusNotFound, "NIP already exists")
+		return cerr.New(http.StatusConflict, "NIP already exists")
 	}
 
 	// filled value
