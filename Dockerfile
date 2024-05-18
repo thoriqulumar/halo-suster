@@ -11,7 +11,7 @@ RUN GOOS=linux GOARCH=amd64 go build -o /main ./cmd/main.go
 FROM alpine
 WORKDIR /app
 
-COPY --from=builder /app/main .
+COPY --from=builder /main .
 
 # Expose port 8080 for the container
 EXPOSE 8080
