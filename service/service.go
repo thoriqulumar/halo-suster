@@ -1,6 +1,6 @@
 package service
 
-import "helo-suster/repo"
+import "halo-suster/repo"
 
 type Service interface{}
 

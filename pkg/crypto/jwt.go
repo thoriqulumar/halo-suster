@@ -1,20 +1,21 @@
 package crypto
 
 import (
-	"helo-suster/model"
+	"fmt"
+	"halo-suster/model"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
-func GenerateToken(id uuid.UUID, name, secret string) (string, error) {
+func GenerateToken(staff model.Staff, secret string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, model.JWTClaims{
-		UserId: id.String(),
-		//NIP:    NIP,
-		Name: name,
+		UserId: staff.UserId.String(),
+		NIP:    fmt.Sprint("%d", staff.NIP),
+		Name:   staff.Name,
+		Role:   string(staff.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(8 * time.Minute)),
 		},
 	})
 
@@ -37,9 +38,10 @@ func VerifyToken(token, secretKey string) (*model.JWTPayload, error) {
 	}
 
 	payload := &model.JWTPayload{
-		Id: claims.UserId,
-		//NIP:  claims.NIP,
+		Id:   claims.UserId,
+		NIP:  claims.NIP,
 		Name: claims.Name,
+		Role: model.Role(claims.Role),
 	}
 
 	return payload, nil

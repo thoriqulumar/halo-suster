@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	application "helo-suster"
-	"helo-suster/config"
+	application "halo-suster"
+	"halo-suster/config"
 )
 
 func main() {

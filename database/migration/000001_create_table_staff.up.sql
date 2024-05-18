@@ -3,6 +3,11 @@ CREATE TYPE "role" AS ENUM (
   'nurse'
 );
 
+CREATE TYPE "status" AS ENUM (
+    'active',
+    'deleted'
+);
+
 
 CREATE TABLE "staff" (
      "id" uuid PRIMARY KEY,
@@ -11,5 +16,6 @@ CREATE TABLE "staff" (
      "role" role,
      "password" varchar,
      "identityCardScanImg" varchar,
+     "status" status,
      "createdAt" timestamp
 );

@@ -1,10 +1,11 @@
 package server
 
 import (
-	"helo-suster/config"
-	"helo-suster/controller"
-	"helo-suster/repo"
-	"helo-suster/service"
+	"halo-suster/config"
+	"halo-suster/controller"
+	"halo-suster/middleware"
+	"halo-suster/repo"
+	"halo-suster/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
@@ -22,22 +23,33 @@ func (s *Server) RegisterRoute(cfg *config.Config) {
 
 func registerImageRoute(e *echo.Group, cfg *config.Config, logger *zap.Logger) {
 	ctr := controller.NewImageController(service.NewImageService(cfg, logger))
-
-	e.POST("/image", ctr.PostImage)
+	auth := middleware.Authentication(cfg.JWTSecret)
+	e.POST("/image", auth(ctr.PostImage))
 }
 
 func registerMedicalRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, validate *validator.Validate, logger *zap.Logger) {
 	ctr := controller.NewMedicalController(service.NewMedicalService(repo.NewMedicalRepo(db), logger), validate)
 
-	e.POST("/medical/patient", ctr.PostPatient)
-	e.POST("/medical/record", ctr.PostMedicalReport)
-	e.GET("/medical/patient", ctr.GetPatient)
-	e.GET("/medical/record", ctr.GetMedicalRecord)
+	auth := middleware.Authentication(cfg.JWTSecret)
+	e.POST("/medical/patient", auth(ctr.PostPatient))
+	e.POST("/medical/record", auth(ctr.PostMedicalReport))
+	e.GET("/medical/patient", auth(ctr.GetPatient))
+	e.GET("/medical/record", auth(ctr.GetMedicalRecord))
 }
 
 func registerStaffRoute(e *echo.Group, db *sqlx.DB, cfg *config.Config, validate *validator.Validate) {
 	ctr := controller.NewStaffController(service.NewStaffService(cfg, repo.NewStaffRepo(db)), validate)
 
-	e.POST("/user/it/register", ctr.Register)
-	e.GET("/user", ctr.GetStaff)
+	auth := middleware.AuthenticationIT(cfg.JWTSecret)
+	e.POST("/user/it/register", ctr.RegisterIT)
+	e.POST("/user/it/login", ctr.LoginIT)
+
+	e.POST("/user/nurse/register", auth(ctr.RegisterNurse))
+	e.POST("/user/nurse/login", ctr.LoginNurse)
+
+	e.GET("/user", auth(ctr.GetUser))
+
+	e.PUT("/user/nurse/:id", auth(ctr.UpdateNurse))
+	e.DELETE("/user/nurse/:id", auth(ctr.DeleteNurse))
+	e.POST("/user/nurse/:id/access", auth(ctr.GrantAccessNurse))
 }

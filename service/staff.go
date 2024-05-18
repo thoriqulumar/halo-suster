@@ -2,19 +2,27 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"fmt"
-	"helo-suster/config"
-	"helo-suster/model"
-	"helo-suster/pkg/crypto"
-	"helo-suster/repo"
-
 	"github.com/google/uuid"
+	"halo-suster/config"
+	"halo-suster/model"
+	"halo-suster/pkg/crypto"
+	cerr "halo-suster/pkg/customErr"
+	"halo-suster/repo"
+	"net/http"
+	"time"
 )
 
 type StaffService interface {
-	Register(newStaff model.Staff) (model.StaffWithToken, error)
-	GetStaff(ctx context.Context, param model.GetStaffRequest) ([]model.Staff, error)
+	GetUser(ctx context.Context, param model.GetListUserParams) ([]model.Staff, error)
+	RegisterIT(ctx context.Context, newStaff model.Staff) (model.StaffWithToken, error)
+	Login(ctx context.Context, staff model.Staff) (model.StaffWithToken, error)
+	RegisterNurse(ctx context.Context, newStaff model.Staff) (model.StaffWithToken, error)
+	LoginNurse(ctx context.Context, staff model.Staff) (model.StaffWithToken, error)
+	UpdateNurse(ctx context.Context, staff model.UpdateNurseRequest) error
+	DeleteNurse(ctx context.Context, userId uuid.UUID) error
+	GrantAccessNurse(ctx context.Context, userId uuid.UUID, password string) error
 }
 
 type staffSvc struct {
@@ -29,16 +37,24 @@ func NewStaffService(cfg *config.Config, r repo.StaffRepo) StaffService {
 	}
 }
 
-func (s *staffSvc) Register(newStaff model.Staff) (model.StaffWithToken, error) {
-	// Validasi data yang diperlukan
-	if newStaff.NIP == 0 || newStaff.Name == "" || newStaff.Password == "" {
-		return model.StaffWithToken{}, errors.New("nip, name, and password are required")
+func (s *staffSvc) RegisterIT(ctx context.Context, newStaff model.Staff) (model.StaffWithToken, error) {
+	role := getRoleFromNIP(newStaff.NIP)
+	if role != model.RoleIt {
+		return model.StaffWithToken{}, cerr.New(http.StatusBadRequest, "nip not valid")
 	}
-	role, err := DetermineRoleByNIP(newStaff.NIP)
+	return s.Register(ctx, newStaff)
+}
+
+func (s *staffSvc) Register(ctx context.Context, newStaff model.Staff) (model.StaffWithToken, error) {
+	staff, err := s.repo.GetUserByNIP(ctx, newStaff.NIP)
 	if err != nil {
-		return model.StaffWithToken{}, err
+		if !errors.Is(err, sql.ErrNoRows) {
+			return model.StaffWithToken{}, cerr.New(http.StatusInternalServerError, err.Error())
+		}
 	}
-	newStaff.Role = role
+	if staff.NIP > 0 {
+		return model.StaffWithToken{}, cerr.New(http.StatusConflict, "nip exist")
+	}
 
 	// Hash password
 	hashedPassword, err := crypto.GenerateHashedPassword(newStaff.Password, s.cfg.BcryptSalt)
@@ -49,47 +65,62 @@ func (s *staffSvc) Register(newStaff model.Staff) (model.StaffWithToken, error) 
 
 	id := uuid.New()
 	newStaff.UserId = id
+	newStaff.CreatedAt = time.Now()
+	newStaff.Status = model.StatusActive
 
-	// Simpan ke database
-	err = s.repo.InsertStaff(newStaff, hashedPassword)
+	// save to database
+	err = s.repo.InsertStaff(ctx, newStaff, hashedPassword)
 	if err != nil {
-		return model.StaffWithToken{}, err
+		return model.StaffWithToken{}, cerr.New(http.StatusInternalServerError, err.Error())
 	}
 
 	// Generate token
-	token, err := crypto.GenerateToken(id, newStaff.Name, s.cfg.JWTSecret)
+	token, err := crypto.GenerateToken(newStaff, s.cfg.JWTSecret)
 	if err != nil {
-		return model.StaffWithToken{}, err
+		return model.StaffWithToken{}, cerr.New(http.StatusInternalServerError, err.Error())
 
 	}
 	serviceResponse := model.StaffWithToken{
 		UserId:      id.String(),
 		AccessToken: token,
 	}
-	return serviceResponse, err
+	return serviceResponse, nil
 
 }
 
-func (s *staffSvc) GetStaff(ctx context.Context, param model.GetStaffRequest) ([]model.Staff, error) {
-	staffList, err := s.repo.GetStaff(ctx, param)
-	if staffList == nil || err != nil {
-		staffList = []model.Staff{}
+func (s *staffSvc) Login(ctx context.Context, staff model.Staff) (model.StaffWithToken, error) {
+	user, err := s.repo.GetUserByNIP(ctx, staff.NIP)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.StaffWithToken{}, cerr.New(http.StatusNotFound, "user not found")
+		}
+		return model.StaffWithToken{}, cerr.New(http.StatusInternalServerError, err.Error())
 	}
-	return staffList, err
+	err = crypto.VerifyPassword(staff.Password, user.Password)
+	if err != nil {
+		return model.StaffWithToken{}, cerr.New(http.StatusBadRequest, "Invalid password")
+	}
+	token, err := crypto.GenerateToken(user, s.cfg.JWTSecret)
+	if err != nil {
+		return model.StaffWithToken{}, cerr.New(http.StatusBadRequest, err.Error())
+	}
+
+	serviceResponse := model.StaffWithToken{
+		UserId:      user.UserId.String(),
+		Name:        user.Name,
+		NIP:         user.NIP,
+		AccessToken: token,
+	}
+
+	return serviceResponse, nil
 }
 
-func DetermineRoleByNIP(nip int64) (string, error) {
-	nipStr := fmt.Sprintf("%013d", nip)
-	if len(nipStr) != 13 || nipStr[:3] != "615" {
-		return "", errors.New("invalid NIP format")
+func (s *staffSvc) GetUser(ctx context.Context, param model.GetListUserParams) ([]model.Staff, error) {
+	// generate filter query from param
+	// do request
+	listUser, err := s.repo.GetListUser(ctx, param)
+	if listUser == nil || err != nil {
+		listUser = []model.Staff{}
 	}
-
-	switch nipStr[3] {
-	case '1':
-		return "it", nil
-	case '2':
-		return "nurse", nil
-	default:
-		return "", errors.New("invalid role digit")
-	}
+	return listUser, err
 }

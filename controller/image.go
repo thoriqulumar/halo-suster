@@ -3,8 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"helo-suster/model"
-	"helo-suster/service"
+	"halo-suster/model"
+	"halo-suster/service"
 	"net/http"
 	"strings"
 

@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"helo-suster/config"
+	"halo-suster/config"
 	"io"
 	"mime/multipart"
 

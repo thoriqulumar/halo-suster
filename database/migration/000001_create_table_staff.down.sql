@@ -1,2 +1,3 @@
 DROP TABLE IF EXISTS "staff";
 DROP TYPE IF EXISTS "role";
+DROP TYPE IF EXISTS "status";
