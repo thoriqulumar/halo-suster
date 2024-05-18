@@ -11,7 +11,7 @@ type PostPatientRequest struct {
 	Name                string `json:"name" validate:"required,min=3,max=30"`
 	BirthDate           string `json:"birthDate" validate:"required"`
 	Gender              string `json:"gender" validate:"required"`
-	IdentityCardScanImg string `json:"identityCardScanImg" validate:"required,url"`
+	IdentityCardScanImg string `json:"identityCardScanImg" validate:"required,custom_url"`
 }
 
 type Patient struct {
@@ -58,13 +58,12 @@ type GetMedicalRecordParams struct {
 
 type GetMedicalRecordData struct {
 	IdentityDetail Patient `json:"identityDetail"`
-	Symptoms       string `json:"symptoms" db:"symptoms"`
-	Medications    string `json:"medications" db:"medications"`
-	CreatedAt      string `json:"createdAt" db:"createdAt"`
+	Symptoms       string  `json:"symptoms" db:"symptoms"`
+	Medications    string  `json:"medications" db:"medications"`
+	CreatedAt      string  `json:"createdAt" db:"createdAt"`
 	CreatedBy      struct {
 		Nip    string `json:"nip"`
 		Name   string `json:"name"`
 		UserId string `json:"userId"`
 	} `json:"createdBy"`
 }
-

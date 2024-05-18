@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"halo-suster/model"
 	"net/url"
 	"strconv"
@@ -47,4 +48,23 @@ func parseGetUserParams(params url.Values) model.GetListUserParams {
 	}
 
 	return result
+}
+
+func GetUserPayload(c echo.Context) (model.Staff, error) {
+	userData := c.Get("userData")
+	sessionData := userData.(*model.JWTPayload)
+	userID, err := uuid.Parse(sessionData.Id)
+	if err != nil {
+		return model.Staff{}, err
+	}
+	nip, err := strconv.ParseInt(sessionData.NIP, 10, 64)
+	if err != nil {
+		return model.Staff{}, err
+	}
+	return model.Staff{
+		UserId: userID,
+		NIP:    nip,
+		Name:   sessionData.Name,
+		Role:   sessionData.Role,
+	}, nil
 }

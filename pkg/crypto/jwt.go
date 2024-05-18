@@ -11,11 +11,11 @@ import (
 func GenerateToken(staff model.Staff, secret string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, model.JWTClaims{
 		UserId: staff.UserId.String(),
-		NIP:    fmt.Sprint("%d", staff.NIP),
+		NIP:    fmt.Sprintf("%d", staff.NIP),
 		Name:   staff.Name,
 		Role:   string(staff.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(8 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(20 * time.Minute)),
 		},
 	})
 

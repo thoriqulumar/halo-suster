@@ -3,9 +3,8 @@ package repo
 import (
 	"context"
 	"fmt"
-	"halo-suster/model"
-
 	"github.com/jmoiron/sqlx"
+	"halo-suster/model"
 )
 
 type MedicalRepo interface {
@@ -81,23 +80,24 @@ func (r *medicalRepo) CreateMedicalRecord(ctx context.Context, requestData model
 	return medicalRecord, nil
 }
 
-var (
-	getPatientQuery = `SELECT * FROM "transaction" WHERE 1=1`
-)
-
 func (r *medicalRepo) GetPatient(ctx context.Context, params model.GetPatientParams) (patients []model.Patient, err error) {
 	var listPatient []model.Patient
+	var getPatientQuery = `SELECT * FROM "patient" WHERE true`
 
 	if params.Name != "" {
-		getPatientQuery += fmt.Sprintf(` AND "name" ILIKE %s`, params.Name)
+		name := "%" + params.Name + "%"
+		getPatientQuery += fmt.Sprintf(` AND "name" ILIKE '%s'`, name)
 	}
 
 	if params.IdentityNumber != nil {
-		getPatientQuery += fmt.Sprintf(` AND "identityNumber" = %d`, params.IdentityNumber)
+		getPatientQuery += fmt.Sprintf(` AND "identityNumber" = %d`, *params.IdentityNumber)
 	}
 
 	if params.PhoneNumber != "" {
-		getPatientQuery += fmt.Sprintf(` AND "phoneNumber" ILIKE %s`, params.PhoneNumber)
+		if len(params.PhoneNumber) < 10 {
+			params.PhoneNumber = "%" + params.PhoneNumber + "%"
+		}
+		getPatientQuery += fmt.Sprintf(` AND "phoneNumber" ILIKE '%s'`, params.PhoneNumber)
 	}
 
 	if params.CreatedAt != "" {
@@ -140,45 +140,46 @@ func (r *medicalRepo) GetPatient(ctx context.Context, params model.GetPatientPar
 
 var (
 	getMedicalRecordQuery = `SELECT 
-							p.identityNumber, p.phoneNumber, p.name, p.birthDate, p.gender, p.identityCardScanImg,
-							mr.symptoms, mr.medications, mr.createdAt,
+							p."identityNumber", p."phoneNumber", p.name, p."birthDate", p.gender, p."identityCardScanImg",
+							mr.symptoms, mr.medications, mr."createdAt",
 							s.nip, s.name, s.id as userId
-						FROM medicalRecord mr
-						JOIN patient p ON mr.identityNumber = p.identityNumber
-						JOIN staff s ON mr.createdBy = s.id
-					    WHERE 1=1`
+						FROM "medicalRecord" mr
+						JOIN patient p ON mr."identityNumber" = p."identityNumber"
+						JOIN staff s ON mr."createdBy" = s.id
+					    WHERE true`
 )
 
 func (r *medicalRepo) GetMedicalRecord(ctx context.Context, params model.GetMedicalRecordParams) (records []model.GetMedicalRecordData, err error) {
 	var listRecord []model.GetMedicalRecordData
+	var getMedicalRecordQuery = getMedicalRecordQuery
 
 	if params.IdentityNumber != nil {
-		getPatientQuery += fmt.Sprintf(` AND "p.identityNumber" = %d`, params.IdentityNumber)
+		getMedicalRecordQuery += fmt.Sprintf(` AND "p.identityNumber" = %d`, params.IdentityNumber)
 	}
 
 	if params.CreatedByUserId != "" {
-		getPatientQuery += fmt.Sprintf(` AND "s.id" = %s`, params.CreatedByUserId)
+		getMedicalRecordQuery += fmt.Sprintf(` AND "s.id" = %s`, params.CreatedByUserId)
 	}
 	if params.CreatedByNip != "" {
-		getPatientQuery += fmt.Sprintf(` AND "s.nip" = %s`, params.CreatedByNip)
+		getMedicalRecordQuery += fmt.Sprintf(` AND "s.nip" = %s`, params.CreatedByNip)
 	}
 
 	if params.CreatedAt != "" {
 		if params.CreatedAt != "desc" && params.CreatedAt != "asc" {
 			params.CreatedAt = "desc"
 		}
-		getPatientQuery += fmt.Sprintf(` ORDER BY "createdAt" %s`, params.CreatedAt)
+		getMedicalRecordQuery += fmt.Sprintf(` ORDER BY "createdAt" %s`, params.CreatedAt)
 	} else {
-		getPatientQuery += ` ORDER BY "createdAt" DESC`
+		getMedicalRecordQuery += ` ORDER BY "createdAt" DESC`
 	}
 
 	if params.Limit == 0 {
 		params.Limit = 5 // default limit
 	}
 
-	getPatientQuery += fmt.Sprintf(` LIMIT %d OFFSET %d`, params.Limit, params.Offset)
+	getMedicalRecordQuery += fmt.Sprintf(` LIMIT %d OFFSET %d`, params.Limit, params.Offset)
 
-	rows, err := r.db.QueryContext(ctx, getPatientQuery)
+	rows, err := r.db.QueryContext(ctx, getMedicalRecordQuery)
 	if err != nil {
 		return nil, err
 	}

@@ -21,6 +21,7 @@ type MedicalController struct {
 
 func NewMedicalController(service service.MedicalService, validate *validator.Validate) *MedicalController {
 	_ = validate.RegisterValidation("phone_number", validatePhoneNumber)
+	_ = validate.RegisterValidation("custom_url", customURL)
 
 	return &MedicalController{
 		service:  service,
@@ -66,9 +67,12 @@ func (c *MedicalController) PostMedicalReport(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, model.MedicalGeneralResponse{Message: err.Error()})
 	}
 
-	mockUser := "8d203c88-9bc2-4838-ac7f-622cc737d614"
+	user, err := GetUserPayload(ctx)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, model.MedicalGeneralResponse{Message: err.Error()})
+	}
 
-	_, err := c.service.CreateNewMedicalRecord(ctx.Request().Context(), medicalRequest, mockUser)
+	_, err = c.service.CreateNewMedicalRecord(ctx.Request().Context(), medicalRequest, user.UserId.String())
 	if err != nil {
 		return ctx.JSON(cerr.GetCode(err), model.MedicalGeneralResponse{Message: err.Error()})
 	}
