@@ -50,8 +50,8 @@ func (s *medicalService) CreateNewPatient(ctx context.Context, request model.Pos
 func (s *medicalService) CreateNewMedicalRecord(ctx context.Context, request model.PostMedicalRecordRequest, createdBy string) (medicalRecord model.MedicalRecord, err error) {
 	_, err = s.repo.GetPatientByIdentityNumber(ctx, request.IdentityNumber)
 	if errors.Is(err, sql.ErrNoRows) {
-		//return model.MedicalRecord{}, cerr.New(http.StatusNotFound, "identityNumber not found")
-		return model.MedicalRecord{}, cerr.New(http.StatusBadRequest, "identityNumber not found")
+		return model.MedicalRecord{}, cerr.New(http.StatusNotFound, "identityNumber not found")
+		//return model.MedicalRecord{}, cerr.New(http.StatusBadRequest, "identityNumber not found")
 	}
 
 	medicalRecord, err = s.repo.CreateMedicalRecord(ctx, request, createdBy)
