@@ -33,7 +33,7 @@ func Load(ctx context.Context) (*Config, error) {
 	// load .env file
 	err := godotenv.Load()
 	if err != nil {
-		return nil, err
+		fmt.Printf("Error loading .env file: %v\n", err)
 	}
 
 	var cfg Config
