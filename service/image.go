@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 
 	// "github.com/google/uuid"
 	"go.uber.org/zap"
@@ -53,10 +54,10 @@ func (s *imageService) UploadImage(file *multipart.FileHeader) <-chan string {
 			return
 		}
 
-		// uuid := uuid.New().String()
-		// fileName := uuid + ".jpeg"
+		uuid := uuid.New().String()
+		fileName := uuid + ".jpeg"
 
-		url, err := uploadToS3(fileBytes, "2b1dcd3b-54a3-4029-9da5-58e316ec6b8b.jpeg", s.cfg)
+		url, err := uploadToS3(fileBytes, uuid+fileName, s.cfg)
 		if err != nil {
 			fileURLChan <- ""
 			return
